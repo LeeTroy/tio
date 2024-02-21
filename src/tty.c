@@ -92,6 +92,7 @@
 #define KEY_5 0x35
 #define KEY_QUESTION 0x3f
 #define KEY_B 0x62
+#define KEY_SHIFT_B 0x42
 #define KEY_C 0x63
 #define KEY_E 0x65
 #define KEY_F 0x66
@@ -590,6 +591,7 @@ void handle_command_sequence(char input_char, char *output_char, bool *forward)
                 tio_printf("Key commands:");
                 tio_printf(" ctrl-%c ?       List available key commands", option.prefix_key);
                 tio_printf(" ctrl-%c b       Send break", option.prefix_key);
+                tio_printf(" ctrl-%c B       Change baudrate", option.prefix_key);
                 tio_printf(" ctrl-%c c       Show configuration", option.prefix_key);
                 tio_printf(" ctrl-%c e       Toggle local echo mode", option.prefix_key);
                 tio_printf(" ctrl-%c f       Toggle log to file", option.prefix_key);
@@ -670,6 +672,20 @@ void handle_command_sequence(char input_char, char *output_char, bool *forward)
 
             case KEY_B:
                 tcsendbreak(fd, 0);
+                break;
+
+            case KEY_SHIFT_B:
+		tio_printf("Change baudrate");
+                tio_printf_raw("Enter baudrate: ");
+                if (tio_readln()) {
+                    int baudrate = atoi(line);
+                    tio_printf("Change baudrate to %u", baudrate);
+                    if (!setspeed(fd, baudrate)) {
+                        option.baudrate = baudrate;
+                    }
+                } else {
+                    tio_printf("Failed to read baudrate setting");
+                }
                 break;
 
             case KEY_C:
